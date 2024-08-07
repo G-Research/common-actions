@@ -4,10 +4,13 @@ const github = require('@actions/github');
 async function run() {
     try {
         const githubToken = core.getInput('github-token');
+        core.info(`GitHub token: ${githubToken ? '***' : 'undefined'}`);
 
         const ghaAppId = 15368;
         const ghaName = 'All required checks done';
-        const myAppId = core.getInput('app-id');
+
+        // const myAppId = core.getInput('app-id');
+
         const myName = 'All required checks succeeded';
         const owner = github.context.payload.repository.owner.login;
         const repo = github.context.payload.repository.name;
@@ -70,7 +73,7 @@ async function run() {
         core.setOutput('result', 'success');
 
     } catch (error) {
-        core.setFailed(error.message);
+        core.setFailed(`Failed to run the action. Error message is: ${error.message}`);
     }
 }
 
