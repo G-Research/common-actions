@@ -1,0 +1,16 @@
+{
+  "name": "check-required",
+  "version": "0.0.1",
+  "description": "Github action to check required jobs in a CI workflow",
+  "main": "index.js",
+  "scripts": {
+    "build": "ncc build src/checkRequired.js -o dist/check-required"
+  },
+  "author": "Ivan Pavlovic",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "@vercel/ncc": "^0.38.1"
+  }
+}

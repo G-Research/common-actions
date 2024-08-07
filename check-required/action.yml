@@ -1,0 +1,17 @@
+name: 'Check Required Jobs'
+description: 'Check if all required jobs in CI workflow were successful'
+author: 'Ivan Pavlovic'
+inputs:
+  github-token:
+    description: 'Github app token'
+    required: true
+  app-id:
+    description: 'Github app id'
+    required: true
+outputs:
+  result:
+    description: 'The result of the check'
+
+runs:
+  using: 'node12'
+  main: '../dist/check-required/index.js'
