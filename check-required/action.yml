@@ -13,5 +13,5 @@ outputs:
     description: 'The result of the check'
 
 runs:
-  using: 'node12'
+  using: 'node20'
   main: '../dist/check-required/index.js'
