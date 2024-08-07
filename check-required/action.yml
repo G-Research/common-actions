@@ -11,4 +11,4 @@ outputs:
 
 runs:
   using: 'node20'
-  main: 'dist/check-required/index.js'
+  main: 'dist/index.js'
