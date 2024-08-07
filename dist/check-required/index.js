@@ -31089,8 +31089,6 @@ async function run() {
         const ghaAppId = 15368;
         const ghaName = 'All required checks done';
 
-        // const myAppId = core.getInput('app-id');
-
         const myName = 'All required checks succeeded';
         const owner = github.context.payload.repository.owner.login;
         const repo = github.context.payload.repository.name;
