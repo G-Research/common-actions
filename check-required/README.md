@@ -39,5 +39,4 @@ jobs:
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           token: ${{ steps.app-token.outputs.token }}
-          app-id: ${{ secrets.APP_ID }}
 ```

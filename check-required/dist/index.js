@@ -31086,8 +31086,9 @@ async function run() {
         const githubToken = core.getInput('github-token');
         core.info(`GitHub token: ${githubToken ? '***' : 'undefined'}`);
 
+        // This is the official Github Actions app id
         const ghaAppId = 15368;
-        const ghaName = 'All required checks done';
+        const ghaName = 'All required checks done'; // TODO make this configurable
 
         const myName = 'All required checks succeeded';
         const owner = github.context.payload.repository.owner.login;

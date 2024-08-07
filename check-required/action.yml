@@ -5,13 +5,10 @@ inputs:
   github-token:
     description: 'Github app token'
     required: true
-  app-id:
-    description: 'Github app id'
-    required: true
 outputs:
   result:
     description: 'The result of the check'
 
 runs:
   using: 'node20'
-  main: '../dist/check-required/index.js'
+  main: 'dist/check-required/index.js'

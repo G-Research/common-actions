@@ -2,9 +2,9 @@
   "name": "check-required",
   "version": "0.0.1",
   "description": "Github action to check required jobs in a CI workflow",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "ncc build src/checkRequired.js -o dist/check-required"
+    "build": "ncc build src/checkRequired.js -o dist"
   },
   "author": "Ivan Pavlovic",
   "license": "MIT",
