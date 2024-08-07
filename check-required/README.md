@@ -38,5 +38,4 @@ jobs:
       - uses: G-Research/common-actions/check-required@main
         with:
           github-token: ${{ steps.app-token.outputs.token }}
-          token: ${{ steps.app-token.outputs.token }}
 ```
