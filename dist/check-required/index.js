@@ -31083,18 +31083,20 @@ const github = __nccwpck_require__(5438);
 
 async function run() {
     try {
-        const appId = core.getInput('app_id');
-        const privateKey = core.getInput('private_key');
+        const githubToken = core.getInput('github-token');
+        core.info(`GitHub token: ${githubToken ? '***' : 'undefined'}`);
+
         const ghaAppId = 15368;
         const ghaName = 'All required checks done';
-        const myAppId = appId;
+
+        // const myAppId = core.getInput('app-id');
+
         const myName = 'All required checks succeeded';
         const owner = github.context.payload.repository.owner.login;
         const repo = github.context.payload.repository.name;
         const sha = github.context.payload.workflow_run.head_sha;
 
-        const token = await createAppToken(appId, privateKey);
-        const octokit = github.getOctokit(token);
+        const octokit = github.getOctokit(githubToken);
 
         core.info(`List GitHub Actions check runs for ${sha}.`);
         const { data: { check_runs: ghaChecks } } = await octokit.rest.checks.listForRef({
@@ -31151,12 +31153,8 @@ async function run() {
         core.setOutput('result', 'success');
 
     } catch (error) {
-        core.setFailed(error.message);
+        core.setFailed(`Failed to run the action. Error message is: ${error.message}`);
     }
-}
-
-async function createAppToken(appId, privateKey) {
-    // Implementation for creating an app token
 }
 
 run();
