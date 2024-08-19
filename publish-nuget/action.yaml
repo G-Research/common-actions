@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-action.json
+name: 'publish-nuget'
+description: 'Publishes a NuGet package and attests to its contents with GitHub artifact attestation.'
+
+inputs:
+  package-name:
+    description: 'Name of the NuGet package, e.g. Newtonsoft.Json .'
+    required: true
+  nuget-key:
+    description: 'API key with which to authenticate to NuGet.org .'
+    required: true
+  nupkg-dir:
+    description: |
+      Directory in which to find the NuGet .nupkg file. We will search one level deep inside this directory for nupkg files named {package-name}.{any-string}.nupkg.
+      Note that this action is not designed to work if you have two .nupkg files inside this directory, one called Foo.0.0.0.nupkg and one called Foo.Bar.0.0.0.nupkg;
+      you should make sure there's only one package in this directory.
+    required: true
+  dotnet:
+    description: 'Path to the `dotnet` executable, if you want to override the default (e.g. because you wish to operate inside a Nix devshell).'
+    required: false
+    default: 'dotnet'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Publish to NuGet
+      shell: bash
+      id: publish-success
+      env:
+        NUGET_API_KEY: ${{ inputs.nuget-key }}
+        PACKAGE_DIR: ${{ inputs.nupkg-dir }}
+        PACKAGE_NAME: ${{ inputs.package-name }}
+        DOTNET_EXE: ${{ inputs.dotnet }}
+      run: '$GITHUB_ACTION_PATH/nuget_push.sh "$PACKAGE_DIR"/"$PACKAGE_NAME".*.nupkg'
+    - name: Wait for availability
+      shell: bash
+      id: await-package
+      if: steps.publish-success.outputs.result == 'published'
+      env:
+        PACKAGE_VERSION: ${{ steps.publish-success.outputs.version }}
+        PACKAGE_NAME: ${{ inputs.package-name }}
+      run: '$GITHUB_ACTION_PATH/await_nuget.sh'
+    # NuGet.org inserts a signature file into uploaded packages.
+    # So we have to *re-attest* it after it's uploaded.
+    # TODO: once NuGet supports reproducible packs (https://github.com/NuGet/Home/issues/6229), also attest to the exact package the pipeline built.)
+    - name: Assert package contents
+      shell: bash
+      if: steps.publish-success.outputs.result == 'published'
+      run: '$GITHUB_ACTION_PATH/assert_contents.sh'
+      env:
+        DOWNLOADED_NUPKG: ${{ steps.await-package.outputs.downloaded_nupkg }}
+        ORIGINAL_NUPKG_DIR: ${{ inputs.nupkg-dir }}
+        PACKAGE_NAME: ${{ inputs.package-name }}
+    - name: Attest Build Provenance
+      if: steps.publish-success.outputs.result == 'published'
+      uses: actions/attest-build-provenance@310b0a4a3b0b78ef57ecda988ee04b132db73ef8 # v1.4.1
+      with:
+        subject-path: ${{ steps.await-package.outputs.downloaded_nupkg }}
