@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-action.json
+name: 'check-required-lite'
+description: 'Checks if the given statuses are successful. Fails if any are not.'
+inputs:
+  needs-context:
+    description: 'JSON string of the needs context, which you should give as toJSON(needs)'
+    required: true
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
