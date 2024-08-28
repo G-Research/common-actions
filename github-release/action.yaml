@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-action.json
+name: 'github-release'
+description: 'Creates a GitHub release corresponding to the given tag.'
+
+inputs:
+  tag:
+    description: |
+      The tag name to which the GitHub release will correspond. This is used as the release name.
+      If no tag exists with this name, the GitHub release will *create* this tag, pointing to `target-commitish` (which defaults to the empty string, i.e. "the current head of the default branch of the repository").
+      On the other hand, if a tag with this name exists, GitHub will simply create a release which points to the tag, and will ignore the `target-commitish` entirely.
+    required: false
+  github-token:
+    description: 'A GitHub token with at least "contents: write" perms.'
+    required: true
+  draft:
+    description: 'Whether the resulting GitHub release should be a draft release.'
+    default: 'false'
+    required: false
+  prerelease:
+    description: 'Whether the resulting GitHub release should be a prerelease.'
+    default: 'false'
+    required: false
+  generate-release-notes:
+    description: 'Whether to enable [generated release notes](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes) on the GitHub release. If you set this, you must set target-commitish.'
+    default: 'false'
+    required: false
+  target-commitish:
+    description: |
+      Specifies the commitish value that will be the target for the release's tag.
+      Required if the supplied `tag` input does not reference an existing tag; ignored if the referenced tag already exists.
+      You must set this if generate-release-notes is true.
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: GitHub Release
+      shell: bash
+      env:
+        GENERATE_RELEASE_NOTES: ${{ inputs.generate-release-notes }}
+        DRAFT: ${{ inputs.draft }}
+        PRERELEASE: ${{ inputs.prerelease }}
+        TAG: ${{ inputs.tag }}
+        GITHUB_TOKEN: "${{ inputs.github-token }}"
+        TARGET_COMMITISH: "${{ inputs.target-commitish }}"
+      run: '$GITHUB_ACTION_PATH/github-release.sh'
