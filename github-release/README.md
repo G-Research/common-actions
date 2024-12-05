@@ -25,7 +25,9 @@ github-release:
         generate-release-notes: true
         draft: true
         prerelease: true
-        binary-contents: path/to/binary
+        binary-contents: |
+          path/to/binary1
+          path/to/binary2
 ```
 
 # Inputs
@@ -68,7 +70,7 @@ If you set this, you must also set `target-commitish` (even if the `tag` already
 
 ## `binary-contents`
 
-A path to some binary data to upload to the release as a release asset.
+A newline-separated list of paths to some binary data to upload to the release as a release asset.
 
 # Why?
 

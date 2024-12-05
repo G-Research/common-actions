@@ -28,7 +28,7 @@ handle_error() {
 
 CURL_URL="https://api.github.com/repos/$GITHUB_REPOSITORY/releases"
 
-echo "curl to: $CURL_URL"
+echo "Creating release with curl: $CURL_URL"
 
 if [ "$DRY_RUN" != 1 ] ; then
     if curl --fail-with-body -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_URL" -d "$curl_body" > curl_output.json; then
@@ -40,12 +40,11 @@ if [ "$DRY_RUN" != 1 ] ; then
     fi
 fi
 
-# Upload the binary, if specified
-
-if [ -n "$BINARY_CONTENTS" ] ; then
-    RELEASE_NAME="$(basename "$BINARY_CONTENTS")"
+# Upload the binary, if specified.
+add_file_to_release() {
+    RELEASE_NAME="$(basename "$1")"
     CURL_URL="https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=$RELEASE_NAME"
-    echo "Posting binary contents to $CURL_URL"
+    echo "Posting binary contents of $1 to $CURL_URL"
 
     curl -X POST \
         -H "Authorization: Bearer $GITHUB_TOKEN" \
@@ -53,5 +52,11 @@ if [ -n "$BINARY_CONTENTS" ] ; then
         -H "X-GitHub-Api-Version: 2022-11-28" \
         -H "Content-Type: application/octet-stream" \
         "$CURL_URL" \
-        --data-binary "@$BINARY_CONTENTS"
+        --data-binary "@$1"
+}
+
+if [ -n "$BINARY_CONTENTS" ] ; then
+    printf '%s\n' "$BINARY_CONTENTS" | while IFS= read -r line; do
+        add_file_to_release "$line"
+    done
 fi
