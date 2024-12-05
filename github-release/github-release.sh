@@ -51,12 +51,15 @@ add_file_to_release() {
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
         -H "Content-Type: application/octet-stream" \
+        --fail \
         "$CURL_URL" \
         --data-binary "@$1"
 }
 
 if [ -n "$BINARY_CONTENTS" ] ; then
     echo "$BINARY_CONTENTS" | while IFS= read -r line; do
-        add_file_to_release "$line"
+        if [ -n "$line" ]; then
+            add_file_to_release "$line"
+        fi
     done
 fi
