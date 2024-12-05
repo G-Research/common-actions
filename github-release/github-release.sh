@@ -56,7 +56,7 @@ add_file_to_release() {
 }
 
 if [ -n "$BINARY_CONTENTS" ] ; then
-    printf '%s\n' "$BINARY_CONTENTS" | while IFS= read -r line; do
+    echo "$BINARY_CONTENTS" | while IFS= read -r line; do
         add_file_to_release "$line"
     done
 fi
