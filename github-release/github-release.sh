@@ -48,14 +48,18 @@ add_file_to_release() {
     echo "Posting binary contents of $1 to $CURL_URL"
 
     if [ "$DRY_RUN" = "false" ] ; then
-        curl -X POST \
+        if ! curl -X POST \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             -H "Content-Type: application/octet-stream" \
             --fail \
             "$CURL_URL" \
-            --data-binary "@$1"
+            --data-binary "@$1" > curl_output.json; then
+            cat curl_output.json
+            echo "Failed to upload asset"
+            exit 1
+        fi
     fi
 }
 
