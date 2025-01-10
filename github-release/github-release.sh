@@ -54,11 +54,19 @@ add_file_to_release() {
             -H "X-GitHub-Api-Version: 2022-11-28" \
             -H "Content-Type: application/octet-stream" \
             --fail \
+            --silent \
             "$CURL_URL" \
-            --data-binary "@$1" > curl_output.json; then
-            cat curl_output.json
-            echo "Failed to upload asset"
-            exit 1
+            --data-binary "@$1" \
+            --write-out "\n%{http_code}" \
+            -o curl_output.txt; then
+            http_code=$(tail -n 1 curl_output.txt)
+            if [ "$http_code" -eq 422 ] ; then
+                echo "Not attempting to replace asset with the same name that was already uploaded."
+            else
+                cat curl_output.txt
+                echo "Failed to upload asset"
+                exit 1
+            fi
         fi
     fi
 }
