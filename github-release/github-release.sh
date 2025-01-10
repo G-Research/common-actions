@@ -48,25 +48,22 @@ add_file_to_release() {
     echo "Posting binary contents of $1 to $CURL_URL"
 
     if [ "$DRY_RUN" = "false" ] ; then
-        if ! curl -X POST \
+        http_code=$(curl -X POST \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             -H "Content-Type: application/octet-stream" \
-            --fail \
             --silent \
             "$CURL_URL" \
             --data-binary "@$1" \
-            --write-out "\n%{http_code}" \
-            -o curl_output.txt; then
-            http_code=$(tail -n 1 curl_output.txt)
-            if [ "$http_code" -eq 422 ] ; then
-                echo "Not attempting to replace asset with the same name that was already uploaded."
-            else
-                cat curl_output.txt
-                echo "Failed to upload asset"
-                exit 1
-            fi
+            --write-out "%{http_code}" \
+            -o curl_output.txt)
+        if [ "$http_code" -eq 422 ] ; then
+            echo "Not attempting to replace asset with the same name that was already uploaded."
+        else
+            cat curl_output.txt
+            echo "Failed to upload asset"
+            exit 1
         fi
     fi
 }
