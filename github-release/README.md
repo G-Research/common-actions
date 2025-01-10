@@ -72,6 +72,10 @@ If you set this, you must also set `target-commitish` (even if the `tag` already
 
 A newline-separated list of paths to some binary data to upload to the release as a release asset.
 
+## `dry-run`
+
+Set this to any value which is not `"false"` to skip the actual push, instead only printing out what would be done.
+
 # Why?
 
 GitHub releasing is an operation which is intended to happen in a privileged context.

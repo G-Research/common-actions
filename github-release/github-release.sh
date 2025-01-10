@@ -3,6 +3,7 @@
 DRAFT=${DRAFT:-false}
 PRERELEASE=${PRERELEASE:-false}
 GENERATE_RELEASE_NOTES=${GENERATE_RELEASE_NOTES:-false}
+DRY_RUN=${DRY_RUN:-false}
 
 # target_commitish is empty by default to indicate the repo default branch
 curl_body='{"tag_name":"'"$TAG"'","target_commitish":"'"$TARGET_COMMITISH"'","name":"'"$TAG"'","draft":'"$DRAFT"',"prerelease": '"$PRERELEASE"',"generate_release_notes":'"$GENERATE_RELEASE_NOTES"'}'
@@ -30,7 +31,7 @@ CURL_URL="https://api.github.com/repos/$GITHUB_REPOSITORY/releases"
 
 echo "Creating release with curl: $CURL_URL"
 
-if [ "$DRY_RUN" != 1 ] ; then
+if [ "$DRY_RUN" = "false" ] ; then
     if curl --fail-with-body -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_URL" -d "$curl_body" > curl_output.json; then
         echo "Curl succeeded."
         RELEASE_ID="$(jq --raw-output --exit-status '.id' curl_output.json)"
@@ -46,14 +47,16 @@ add_file_to_release() {
     CURL_URL="https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=$RELEASE_NAME"
     echo "Posting binary contents of $1 to $CURL_URL"
 
-    curl -X POST \
-        -H "Authorization: Bearer $GITHUB_TOKEN" \
-        -H "Accept: application/vnd.github+json" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        -H "Content-Type: application/octet-stream" \
-        --fail \
-        "$CURL_URL" \
-        --data-binary "@$1"
+    if [ "$DRY_RUN" = "false" ] ; then
+        curl -X POST \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Content-Type: application/octet-stream" \
+            --fail \
+            "$CURL_URL" \
+            --data-binary "@$1"
+    fi
 }
 
 if [ -n "$BINARY_CONTENTS" ] ; then
