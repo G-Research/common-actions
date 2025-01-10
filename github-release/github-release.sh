@@ -60,7 +60,7 @@ add_file_to_release() {
             -o curl_output.txt)
         if [ "$http_code" -eq 422 ] ; then
             echo "Not attempting to replace asset with the same name that was already uploaded."
-        else
+        elif [ "$http_code" -ne 200 ] && [ "$http_code" -ne 201 ] ; then
             cat curl_output.txt
             echo "Failed to upload asset"
             exit 1
