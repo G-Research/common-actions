@@ -1,0 +1,55 @@
+name: "SBOM Generator"
+description: G-Research wrapper for creating SBOMs
+inputs:
+  scan-target:
+    description: "What to scan (path or image)"
+    required: false
+    default: "."
+  scan-type:
+    description: "Scan type (filesystem|image)"
+    required: false
+    default: "filesystem"
+  output-dir:
+    description: "Directory where SBOM(s) will be written"
+    required: false
+    default: "sbom"
+  artifact-name:
+    description: "Name of uploaded artifact"
+    required: false
+    default: "sbom"
+  upload-artifact:
+    description: "Upload SBOM artifact?"
+    default: true
+outputs:
+  sbom-path:
+    description: "Path of primary SBOM file"
+    value: ${{ steps.set-output-path.outputs.sbom_path }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure output directory exists
+      shell: bash
+      run: |
+        mkdir -p "${{ inputs.output-dir }}"
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@v0.21.1 # Immutable tag
+      with:
+        path: ${{ inputs.scan-target }}
+        output-file: ${{ inputs.output-dir }}/sbom.spdx.json
+        format: "spdx"
+        upload-artifact: false
+
+    - name: Set SBOM output path
+      id: set-output-path
+      shell: bash
+      run: |
+        echo "sbom_path=${{ inputs.output-dir }}/sbom.spdx.json" >> "$GITHUB_OUTPUT"
+
+    - name: Upload SBOM artifact
+      if: ${{ inputs.upload-artifact == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.output-dir }}
