@@ -1,0 +1,28 @@
+name: zizmor autofix (prototype)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "0 6 * * 1"   # weekly, enable after testing
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false # push via explicit token instead (artipacked-clean)
+
+      - name: zizmor autofix
+        uses: ./zizmor-autofix
+        with:
+          # TODO: switch to a GitHub App token so the opened PRs can trigger
+          # other workflows (the default GITHUB_TOKEN can't do that).
+          github-token: ${{ github.token }}

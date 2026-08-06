@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-action.json
+name: 'zizmor-autofix'
+description: 'Scans the repository with zizmor and opens one PR per (audit, disposition) bucket of automated fixes.'
+
+inputs:
+  github-token:
+    description: |
+      A GitHub token used to create labels, push autofix branches and open/update PRs.
+      Needs "contents: write" and "pull-requests: write" perms. The default GITHUB_TOKEN
+      works, but its PRs won't trigger other workflows (e.g. CI) — for that, prefer a
+      GitHub App installation token over a personal PAT.
+    required: true
+  zizmor-version:
+    description: 'Version of zizmor to install.'
+    default: '1.28.0'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install zizmor
+      shell: bash
+      env:
+        ZIZMOR_VERSION: ${{ inputs.zizmor-version }}
+      run: |
+        curl -fsSL "https://github.com/zizmorcore/zizmor/releases/download/v${ZIZMOR_VERSION}/zizmor-x86_64-unknown-linux-gnu.tar.gz" \
+          | tar -xz
+        sudo mv zizmor /usr/local/bin/zizmor
+        zizmor --version
+
+    - name: Ensure PR labels exist
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        gh label create safe-fix     --color 0e8a16 --description "zizmor safe autofix"   2>/dev/null || true
+        gh label create needs-review --color d93f0b --description "zizmor unsafe autofix" 2>/dev/null || true
+
+    - name: Scan → manifest
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: zizmor --format=json . > "$RUNNER_TEMP/manifest.json" || true
+
+    - name: Bucket + open PRs
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        MANIFEST: ${{ runner.temp }}/manifest.json
+      run: |
+        pip install --quiet pyyaml
+        python3 "${{ github.action_path }}/zizmor_autofix.py"
