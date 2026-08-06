@@ -28,7 +28,7 @@ jobs:
 
       - uses: G-Research/common-actions/zizmor-autofix@main
         with:
-          # Use a PAT/app token rather than the default GITHUB_TOKEN if you want
-          # the opened PRs to trigger other workflows (e.g. CI).
-          github-token: ${{ secrets.ZIZMOR_PAT }}
+          # The default GITHUB_TOKEN works, but PRs it opens won't trigger other
+          # workflows. Prefer a GitHub App installation token for that.
+          github-token: ${{ github.token }}
 ```

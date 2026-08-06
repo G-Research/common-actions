@@ -6,8 +6,9 @@ inputs:
   github-token:
     description: |
       A GitHub token used to create labels, push autofix branches and open/update PRs.
-      Needs "contents: write" and "pull-requests: write" perms. Use a PAT (or app token)
-      rather than the default GITHUB_TOKEN if you want the resulting PRs to trigger other workflows.
+      Needs "contents: write" and "pull-requests: write" perms. The default GITHUB_TOKEN
+      works, but its PRs won't trigger other workflows (e.g. CI) — for that, prefer a
+      GitHub App installation token over a personal PAT.
     required: true
   zizmor-version:
     description: 'Version of zizmor to install.'
